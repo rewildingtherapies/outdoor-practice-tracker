@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice Setup Milestone Tracker — The Outdoor Practice</title>
+<meta name="description" content="Everything you need to take your therapeutic work outdoors — an interactive milestone tracker from The Outdoor Practice.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Sans:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest:#1a3a2a; --forest-mid:#244d36; --forest-light:#2d5a3f;
+    --bone:#faf6f1; --bone-mid:#e8e0d2; --bone-dark:#d4cbbf;
+    --ember:#c4622a; --ember-light:#d4835a;
+    --bark:#3d2e1e; --bark-light:#5a4a38; --moss:#4a6b3a;
+  }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:'IBM Plex Sans',-apple-system,sans-serif;background:var(--bone);color:var(--bark);min-height:100vh;-webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
+
+  .scrap{position:fixed;pointer-events:none;z-index:0}
+  .s1{top:80px;right:20px;width:180px;opacity:.15;transform:rotate(12deg)}
+  .s2{top:45%;left:10px;width:140px;opacity:.12;transform:rotate(-8deg)}
+  .s3{bottom:20%;right:30px;width:130px;opacity:.13;transform:rotate(18deg)}
+  .s4{top:200px;left:30px;width:100px;opacity:.1;transform:rotate(-15deg)}
+  .s5{top:65%;right:50px;width:90px;opacity:.1;transform:rotate(25deg)}
+
+  .hdr{background:linear-gradient(180deg,#1a3a2a,#244d36);padding:48px 24px 20px;text-align:center;position:relative;overflow:hidden;z-index:2}
+  .hdr::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(196,98,42,0.08) 0%,transparent 60%);pointer-events:none}
+  .hdr-label{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--ember-light);margin-bottom:16px;position:relative}
+  .hdr-title{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(28px,5.5vw,48px);color:var(--bone);line-height:1.15;position:relative}
+  .hdr-accent{font-style:italic;color:var(--ember-light);display:block}
+  .hdr-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(15px,2vw,18px);color:rgba(245,240,232,0.5);margin-top:14px;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.5;position:relative}
+
+  .mtn-container{max-width:760px;margin:0 auto;padding:0 16px;position:relative;z-index:2}
+  .mtn-card{background:transparent;border-radius:20px;padding:20px 0 0;overflow:hidden;margin-top:32px;position:relative}
+  .mtn-card::before{content:'';position:absolute;inset:0;background:
+    repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(180,170,150,0.08) 28px, rgba(180,170,150,0.08) 29px),
+    repeating-linear-gradient(90deg, transparent, transparent 28px, rgba(180,170,150,0.06) 28px, rgba(180,170,150,0.06) 29px);
+    pointer-events:none;z-index:0;border-radius:20px}
+  .mtn-svg{width:100%;display:block;position:relative;z-index:1}
+  .camp-group{cursor:pointer}
+
+  .detail-area{max-width:660px;margin:0 auto;padding:0 24px;position:relative;z-index:2}
+  .detail-card{margin-top:28px;background:#fff;border-radius:16px;padding:28px 24px;border:1px solid rgba(61,46,30,0.06);border-left:4px solid var(--ember);position:relative;overflow:hidden}
+  .detail-card.is-reached{border-left-color:var(--forest)}
+  .detail-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .detail-num-circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;flex-shrink:0;background:rgba(196,98,42,0.12);color:var(--ember)}
+  .detail-num-circle.done{background:var(--forest);color:#fff}
+  .detail-meta{display:flex;flex-direction:column}
+  .detail-milestone-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#9b8f7e}
+  .detail-altitude{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--ember);margin-top:1px}
+  .detail-title{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(22px,3vw,28px);color:var(--forest);line-height:1.2;margin-bottom:8px}
+  .detail-card.is-reached .detail-title{color:var(--forest-mid)}
+  .detail-desc{font-size:14.5px;line-height:1.7;color:var(--bark-light);font-weight:300}
+
+  .steps-wrap{margin-top:18px;padding-top:16px;border-top:1px solid rgba(61,46,30,0.07)}
+  .steps-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#9b8f7e;margin-bottom:12px}
+  .step-row{display:flex;align-items:flex-start;gap:11px;padding:9px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+  .step-row:last-child{border-bottom:none}
+  .step-box{width:22px;height:22px;border:1.5px solid var(--bone-dark);border-radius:50%;cursor:pointer;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .22s;background:transparent}
+  .step-box:hover{border-color:var(--ember)}
+  .step-box.done{background:var(--forest);border-color:var(--forest)}
+  .step-box .cv{display:none;width:12px;height:12px}
+  .step-box.done .cv{display:block}
+  .step-txt{font-size:14px;line-height:1.6;color:var(--bark);font-weight:300;transition:opacity .2s}
+  .step-txt.done{opacity:.42;text-decoration:line-through}
+
+  .reward{margin-top:18px;padding:16px 18px;background:rgba(26,58,42,0.05);border:1px solid rgba(26,58,42,0.1);border-radius:12px;display:none;animation:slideIn .4s ease}
+  .reward.show{display:block}
+  @keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .reward-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--forest-mid);font-weight:700;margin-bottom:6px}
+  .reward-text{font-size:14px;line-height:1.6;color:var(--forest-mid)}
+
+  .nav-dots{display:flex;justify-content:center;gap:6px;margin-top:20px;flex-wrap:wrap}
+  .nav-dot{width:8px;height:8px;border-radius:50%;border:none;cursor:pointer;transition:all .2s;padding:0;background:rgba(61,46,30,0.12)}
+  .nav-dot.on{background:var(--forest)}
+  .nav-dot.active{background:var(--ember);width:24px;border-radius:4px}
+
+  .nav-arrows{display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+  .nav-arrow{font-family:'IBM Plex Sans',sans-serif;font-weight:500;font-size:13px;border:none;cursor:pointer;transition:all .15s;padding:10px 20px;border-radius:50px;display:flex;align-items:center;gap:6px}
+  .nav-arrow.prev{background:rgba(61,46,30,0.06);color:#6b5d4a}
+  .nav-arrow.prev:hover{background:rgba(61,46,30,0.1)}
+  .nav-arrow.next{background:var(--ember);color:#fff}
+  .nav-arrow.next:hover{background:var(--ember-light)}
+  .nav-arrow:disabled{opacity:.3;cursor:default}
+
+  .what-card{border-left:3px solid var(--ember);padding:18px 22px;background:rgba(196,98,42,0.04);border-radius:0 12px 12px 0;margin-top:32px}
+  .what-label{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--ember);font-weight:700;display:inline}
+  .what-text{display:inline;font-size:14.5px;line-height:1.7;color:var(--bark-light);font-weight:300}
+
+  .prog-wrap{max-width:760px;margin:0 auto;padding:16px 16px 0;position:relative;z-index:2}
+  .prog-card{background:linear-gradient(135deg,#244d36,#1a3a2a);border-radius:16px;padding:24px 28px}
+  .prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .prog-label{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(245,240,232,0.5)}
+  .prog-count{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--ember-light)}
+  .prog-bg{width:100%;height:6px;background:rgba(245,240,232,0.1);border-radius:3px;overflow:hidden}
+  .prog-fill{height:100%;border-radius:3px;width:0%;transition:width .6s cubic-bezier(.34,1.56,.64,1);background:linear-gradient(90deg,var(--ember),var(--moss))}
+  .prog-sub{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;color:rgba(245,240,232,0.35);margin-top:10px;text-align:right}
+
+  .bottom-section{background:linear-gradient(180deg,#1a3a2a,#15301f);padding:60px 24px 48px;text-align:center;margin-top:48px;position:relative;z-index:2}
+  .bottom-title{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(22px,4vw,32px);color:var(--bone);margin-bottom:14px;max-width:520px;margin-left:auto;margin-right:auto;line-height:1.3}
+  .bottom-title em{font-style:italic;color:var(--ember-light)}
+  .bottom-text{font-size:15px;line-height:1.7;color:rgba(245,240,232,0.55);max-width:480px;margin:0 auto;font-weight:300}
+  .bottom-btn{display:inline-flex;align-items:center;gap:8px;background:var(--ember);color:#fff;font-family:'IBM Plex Sans',sans-serif;font-weight:500;font-size:16px;padding:18px 42px;border-radius:50px;border:none;cursor:pointer;margin-top:28px;transition:all .25s;text-decoration:none;box-shadow:0 6px 24px rgba(196,98,42,0.3)}
+  .bottom-btn:hover{background:var(--ember-light);transform:translateY(-2px);box-shadow:0 10px 32px rgba(196,98,42,0.45)}
+  .bottom-divider{width:200px;height:1px;background:rgba(245,240,232,0.08);margin:48px auto 36px}
+  .bottom-brand{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:18px;color:rgba(245,240,232,0.6);margin-bottom:6px}
+  .bottom-details{font-size:12px;color:rgba(245,240,232,0.28);margin-bottom:6px}
+  .bottom-links a{color:rgba(245,240,232,0.28);text-decoration:none;font-size:12px}
+  .bottom-links a:hover{color:var(--ember-light)}
+
+  .email-form{display:none;max-width:420px;margin:24px auto 0;background:rgba(245,240,232,0.05);border:1px solid rgba(245,240,232,0.1);border-radius:14px;padding:22px}
+  .email-form.show{display:block;animation:slideIn .4s ease}
+  .email-form-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(245,240,232,0.5);margin-bottom:10px}
+  .email-form input{width:100%;padding:13px 16px;margin-bottom:10px;border:1px solid rgba(245,240,232,0.15);background:rgba(245,240,232,0.04);border-radius:8px;color:var(--bone);font-family:'IBM Plex Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+  .email-form input::placeholder{color:rgba(245,240,232,0.35)}
+  .email-form input:focus{border-color:var(--ember)}
+  .email-form button{width:100%;padding:13px;background:var(--ember);color:#fff;border:none;border-radius:8px;font-family:'IBM Plex Sans',sans-serif;font-weight:500;font-size:14px;cursor:pointer;transition:background .2s}
+  .email-form button:hover{background:var(--ember-light)}
+  .email-form button:disabled{opacity:.6;cursor:default}
+  .email-form-note{font-size:11px;color:rgba(245,240,232,0.35);text-align:center;margin-top:8px}
+  .email-form-success{display:none;text-align:center;padding:20px 0}
+  .email-form-success.show{display:block}
+  .email-form-success h4{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--ember-light);margin-bottom:6px}
+  .email-form-success p{font-size:13px;color:rgba(245,240,232,0.55);line-height:1.5}
+
+  .reset-btn{position:fixed;bottom:16px;right:16px;background:rgba(255,255,255,0.85);color:var(--bark-light);border:1px solid var(--bone-mid);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:8px 14px;border-radius:50px;cursor:pointer;z-index:10;transition:all .2s;backdrop-filter:blur(4px)}
+  .reset-btn:hover{background:#fff;color:var(--ember)}
+
+  @media(max-width:520px){
+    .hdr{padding:36px 20px 16px}
+    .detail-area{padding:0 16px}
+    .detail-card{padding:22px 18px}
+    .nav-arrow{padding:8px 14px;font-size:12px}
+  }
+</style>
+</head>
+<body>
+
+<svg class="scrap s1" viewBox="0 0 180 200" xmlns="http://www.w3.org/2000/svg"><path d="M10,5 Q30,0 50,8 Q70,2 90,6 Q110,0 130,5 Q150,2 170,8 L175,10 Q172,40 175,70 Q170,100 175,130 Q172,160 175,190 L170,195 Q150,192 130,198 Q110,195 90,192 Q70,198 50,195 Q30,192 10,198 L5,190 Q8,160 5,130 Q8,100 5,70 Q8,40 5,10 Z" fill="#e8e0d4"/><line x1="30" y1="50" x2="150" y2="50" stroke="#d4cbbe" stroke-width="0.8"/><line x1="30" y1="70" x2="150" y2="70" stroke="#d4cbbe" stroke-width="0.8"/><line x1="30" y1="90" x2="120" y2="90" stroke="#d4cbbe" stroke-width="0.8"/><line x1="30" y1="110" x2="140" y2="110" stroke="#d4cbbe" stroke-width="0.8"/></svg>
+<svg class="scrap s2" viewBox="0 0 140 160" xmlns="http://www.w3.org/2000/svg"><path d="M8,3 Q30,0 60,5 Q90,0 120,4 Q135,6 137,10 Q134,50 137,90 Q134,130 137,155 Q120,158 90,155 Q60,160 30,156 Q10,154 7,150 Q10,110 7,70 Q10,30 7,10 Z" fill="#ede5d8"/></svg>
+<svg class="scrap s3" viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg"><path d="M5,5 Q25,0 50,6 Q75,0 100,5 Q115,8 117,12 Q114,45 117,80 Q114,110 117,135 Q100,138 75,135 Q50,140 25,136 Q8,133 5,128 Q8,95 5,60 Q8,25 5,10 Z" fill="#e0d8cc"/><line x1="20" y1="40" x2="100" y2="40" stroke="#d4cbbe" stroke-width="0.6"/><line x1="20" y1="58" x2="100" y2="58" stroke="#d4cbbe" stroke-width="0.6"/></svg>
+<svg class="scrap s4" viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg"><path d="M5,5 Q20,0 40,6 Q60,0 80,5 Q95,8 97,12 Q94,35 97,60 Q94,85 97,105 Q80,108 60,105 Q40,110 20,106 Q8,103 5,98 Q8,75 5,50 Q8,25 5,10 Z" fill="#e8e2d6"/></svg>
+<svg class="scrap s5" viewBox="0 0 90 100" xmlns="http://www.w3.org/2000/svg"><path d="M5,5 Q20,0 45,6 Q70,0 85,5 L88,10 Q85,35 88,60 Q85,85 88,95 Q70,98 45,95 Q20,100 5,96 L3,90 Q6,65 3,40 Q6,15 3,10 Z" fill="#e4dcd0"/></svg>
+
+<div class="hdr">
+  <div class="hdr-label">THE OUTDOOR PRACTICE</div>
+  <h1 class="hdr-title">Practice Setup<span class="hdr-accent">Milestone Tracker</span></h1>
+  <p class="hdr-sub">Everything you need to take your therapeutic work outdoors, one camp at a time. Click a camp to see its steps and tick them off.</p>
+</div>
+
+<div class="mtn-container">
+  <div class="mtn-card">
+    <svg viewBox="0 0 560 460" class="mtn-svg" id="mtnSvg">
+      <defs>
+        <linearGradient id="greenFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2d5a3f"/>
+          <stop offset="100%" stop-color="#1a3a2a"/>
+        </linearGradient>
+        <clipPath id="greenClip"><rect id="greenRect" x="0" y="460" width="560" height="0" style="transition:all .7s ease"/></clipPath>
+      </defs>
+      <path d="M0,360 L60,310 L120,335 L200,280 L280,315 L360,270 L440,300 L520,260 L560,285 L560,460 L0,460 Z" fill="rgba(61,46,30,0.04)"/>
+      <path d="M60,450 L200,190 L370,50 L490,190 L560,450 Z" fill="#c8bfb0"/>
+      <path d="M100,450 L220,210 L370,70 L470,210 L520,450 Z" fill="#d6cdc0"/>
+      <g clip-path="url(#greenClip)">
+        <path d="M60,450 L200,190 L370,50 L490,190 L560,450 Z" fill="#2d5a3f" opacity="0.5"/>
+        <path d="M100,450 L220,210 L370,70 L470,210 L520,450 Z" fill="url(#greenFill)" opacity="0.6"/>
+      </g>
+      <path d="M0,450 L0,340 L60,290 L130,340 L130,450 Z" fill="#bab0a0"/>
+      <path d="M430,450 L490,320 L560,355 L560,450 Z" fill="#bab0a0"/>
+      <path d="M348,90 L370,50 L392,90 Q382,78 370,82 Q358,78 348,90 Z" fill="rgba(245,240,232,0.85)"/>
+      <path d="M182,215 L200,190 L218,215 Q210,205 200,208 Q190,205 182,215 Z" fill="rgba(245,240,232,0.5)"/>
+      <path id="trailDash" fill="none" stroke="rgba(61,46,30,0.15)" stroke-width="2.5" stroke-dasharray="6 5" stroke-linecap="round"/>
+      <path id="trailFill" fill="none" stroke="#3a8a52" stroke-width="3.5" stroke-linecap="round" opacity="0.85" style="transition:all .5s"/>
+      <path id="ground" d="M0,442 Q140,430 280,440 Q420,450 560,435 L560,460 L0,460 Z" fill="rgba(45,90,63,0.08)" style="transition:fill .5s"/>
+      <g id="trees"></g>
+      <g id="camps"></g>
+      <g id="summitFlag" opacity="0.3" style="transition:opacity .5s">
+        <line x1="370" y1="50" x2="370" y2="28" stroke="#9b8f7e" stroke-width="2" stroke-linecap="round"/>
+        <path d="M370,28 L388,34 L370,40" fill="rgba(155,143,126,0.4)"/>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<div class="prog-wrap">
+  <div class="prog-card">
+    <div class="prog-top">
+      <span class="prog-label">PHASES COMPLETE</span>
+      <span class="prog-count" id="progCount">0 / 7</span>
+    </div>
+    <div class="prog-bg"><div class="prog-fill" id="progFill"></div></div>
+    <div class="prog-sub" id="progSub">0 of 28 steps ticked off</div>
+  </div>
+</div>
+
+<div class="detail-area">
+  <div class="detail-card not-reached" id="detailCard">
+    <div class="detail-top">
+      <div class="detail-num-circle" id="detailNum">01</div>
+      <div class="detail-meta">
+        <div class="detail-milestone-label" id="detailPhaseLabel">PHASE 1 OF 7</div>
+        <div class="detail-altitude" id="detailAltitude">\u25B2 Base Camp</div>
+      </div>
+    </div>
+    <div class="detail-title" id="detailTitle">Foundations</div>
+    <div class="detail-desc" id="detailDesc"></div>
+    <div class="steps-wrap">
+      <div class="steps-label" id="stepsLabel">0 of 5 steps</div>
+      <div id="stepsList"></div>
+    </div>
+    <div class="reward" id="reward">
+      <div class="reward-label">\ud83c\udf32 PHASE COMPLETE</div>
+      <div class="reward-text" id="rewardText"></div>
+    </div>
+  </div>
+
+  <div class="nav-dots" id="navDots"></div>
+
+  <div class="nav-arrows">
+    <button class="nav-arrow prev" id="prevBtn">\u2190 Previous</button>
+    <button class="nav-arrow next" id="nextBtn">Next \u2192</button>
+  </div>
+
+  <div class="what-card">
+    <span class="what-label">HOW IT WORKS: </span>
+    <span class="what-text">Each camp on the mountain is a phase of setting up your outdoor practice. Click a camp to open its steps, then tick them off. Complete every step in a phase and the camp turns green, the trail fills, and the mountain comes alive. Reach the summit and you've mapped the whole path.</span>
+  </div>
+</div>
+
+<div class="bottom-section">
+  <div class="bottom-title" id="bottomTitle">Setting up alone is hard. <em>You don't have to.</em></div>
+  <div class="bottom-text" id="bottomText">Some practitioners work through this themselves. Others want someone who's already done it to guide them. Join the community and walk the path with people who get it.</div>
+  <a href="https://www.skool.com/outdoor-psychotherapy-3052/about" target="_blank" rel="noopener" class="bottom-btn">Join the community \u2192</a>
+
+  <div class="email-form" id="emailForm">
+    <div class="email-form-label">JOIN THE PRACTITIONER LIST</div>
+    <div id="emailFormBody">
+      <input type="text" id="ctName" placeholder="Your first name" autocomplete="given-name">
+      <input type="email" id="ctEmail" placeholder="Your email address" autocomplete="email">
+      <button id="ctSubmit">Send me the next steps \u2192</button>
+      <div class="email-form-note">Monthly Notes from the Practice. No spam. Unsubscribe anytime.</div>
+    </div>
+    <div class="email-form-success" id="emailFormSuccess">
+      <h4>You're in.</h4>
+      <p>Check your inbox in a few minutes for what comes next.</p>
+    </div>
+  </div>
+
+  <div class="bottom-divider"></div>
+  <div class="bottom-brand">The Outdoor Practice</div>
+  <div class="bottom-details">Holding space in nature \u00b7 rewildingtherapies.com</div>
+  <div class="bottom-links"><a href="https://rewildingtherapies.com" target="_blank" rel="noopener">rewildingtherapies.com</a></div>
+</div>
+
+<button class="reset-btn" id="resetBtn" title="Clear saved progress">\u21bb Reset progress</button>
+
+<script>
+  // Brevo form action URL
+  const BREVO_FORM_URL = 'https://13d1b2ff.sibforms.com/serve/MUIFAClo6RvZ8oLiiq3fyoNTwFBXWvZI0lmXUZkyTKW7bCiT7bZrpUUqirNec3TOOO0hrQDnXZwyOO5KoweLiYtWty9gCo9yOSotO5lY573i5MldoL2q9bJiEoyr4umWc2abNU3gYiYf0TwUy3VSbQec0XvHmkaKabrGBlzkLnvZS9wVY0ssuwI3YxPBgQW4fNxqJMrj-myo67AhBw==';
+
+  const STORAGE_KEY = 'outdoor-practice-milestone-v1';
+
+  const phases = [
+    {
+      title:"Foundations", altitude:"Base Camp", num:"01",
+      desc:"Get clear on your modality, your sites, and the skills you'll need before anyone steps into the woods with you.",
+      reward:"Your ground is solid. You know what you offer, where you'll offer it, and what you still need to learn.",
+      steps:[
+        "Confirm your core therapeutic modality and how it adapts to outdoor settings",
+        "Identify 2\u20133 outdoor sites you could realistically use for sessions",
+        "Walk each site at different times of day and in different weather, note access, noise, privacy, hazards",
+        "Research your professional body's position on outdoor practice (BACP, UKCP, BPS, etc.)",
+        "Identify any gaps in your outdoor skills, do you need first aid, bushcraft basics, or fire safety training?"
+      ]
+    },
+    {
+      title:"Risk & Safety", altitude:"1,200m", num:"02",
+      desc:"Put the assessments and protocols in place that keep clients safe and let you work with confidence.",
+      reward:"You can hold space outdoors knowing the safety net is real. If something goes wrong, you have a plan.",
+      steps:[
+        "Complete a site-specific risk assessment for each location you plan to use",
+        "Complete an activity-specific risk assessment for each type of session (walk-and-talk, bushcraft, naturecraft, fire-lighting, movement work)",
+        "Create a protocol for individual client risk assessments where appropriate",
+        "Write an emergency action plan, what you do if a client is injured, distressed, or lost",
+        "Set up a check-in system, someone who knows where you are and when to expect you back"
+      ]
+    },
+    {
+      title:"Insurance & Legal", altitude:"2,000m", num:"03",
+      desc:"Get written confirmation that you're properly covered for the outdoor work you actually do.",
+      reward:"You're covered, in writing. No grey areas, no assumptions, just clear filed confirmation you can point to.",
+      steps:[
+        "Contact your insurer in writing, confirm cover for outdoor talking therapy specifically",
+        "Confirm whether your policy covers activity-based work (bushcraft, movement, naturecraft, fire-lighting, tool use)",
+        "If not covered, research specialist outdoor therapy insurers and get quotes",
+        "Check public liability insurance requirements for your sites",
+        "Get written confirmation of all cover, keep it filed and accessible"
+      ]
+    },
+    {
+      title:"Contracting & Ethics", altitude:"2,800m", num:"04",
+      desc:"Adapt your paperwork and consent process for the realities of working in open, shared spaces.",
+      reward:"Your clients know exactly what they're stepping into. Consent is informed, ethics are covered, boundaries are clear.",
+      steps:[
+        "Update your client contract to address outdoor-specific considerations (weather cancellation, dress code, confidentiality outdoors)",
+        "Add a confidentiality clause covering chance encounters, being overheard, and the use of environmental metaphor",
+        "Create an informed consent process explaining what outdoor sessions involve and how they differ from indoor work",
+        "Review your data protection, notes taken outdoors, phone use, photographs"
+      ]
+    },
+    {
+      title:"Client Readiness", altitude:"3,400m", num:"05",
+      desc:"Decide who outdoor work suits, when, and what you'll do when the outdoors becomes too much.",
+      reward:"You know who to take outside and who to hold back, and you have a step-down plan when things get dysregulating.",
+      steps:[
+        "Develop a screening process for which clients are suitable for outdoor work and at what stage",
+        "Create a brief orientation document for clients before their first outdoor session",
+        "Plan your approach for clients who find outdoor sessions dysregulating, what's your step-down protocol?",
+        "Identify contraindications specific to your client group (mobility, phobias, sensory processing, trauma presentations)"
+      ]
+    },
+    {
+      title:"Supervision & Support", altitude:"4,200m", num:"06",
+      desc:"Make sure you're held too, by a supervisor who gets outdoor work and a community who can talk it through.",
+      reward:"You're not doing this alone. You have supervision that understands the work and a place to bring the hard parts.",
+      steps:[
+        "Assess whether your current supervisor has experience of outdoor therapeutic work",
+        "If not, identify a supervisor or peer group with outdoor practice experience",
+        "Join a professional community where outdoor practice challenges can be discussed openly",
+        "Set up your own reflective practice, a sit-spot, journal, or regular nature connection routine"
+      ]
+    },
+    {
+      title:"Business & Growth", altitude:"Summit", num:"07",
+      desc:"Build the structure, funding, and presence that turns a practice into something that lasts.",
+      reward:"You've reached the summit. The practice has a structure, a way to be funded, and a way for clients to find you.",
+      steps:[
+        "Decide your business structure, sole trader, limited company, or CIC",
+        "If going the CIC route, research Community Interest Company registration and governance requirements",
+        "Identify funding opportunities, grants, local authority contracts, social prescribing partnerships",
+        "Build a simple online presence that communicates what you do and how to book",
+        "Set your pricing and session structure for outdoor work"
+      ]
+    }
+  ];
+
+  const campPositions = [
+    {x:140,y:410,side:"left"},
+    {x:215,y:350,side:"right"},
+    {x:305,y:295,side:"left"},
+    {x:375,y:240,side:"right"},
+    {x:330,y:180,side:"left"},
+    {x:400,y:125,side:"right"},
+    {x:370,y:68,side:"left"}
+  ];
+
+  const treePos = [{x:80,y:432},{x:130,y:425},{x:460,y:428},{x:500,y:436},{x:50,y:440},{x:520,y:430}];
+
+  const state = phases.map(()=>new Set());
+  let selected = 0;
+  let emailSubmitted = false;
+
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.state && Array.isArray(parsed.state)) {
+        parsed.state.forEach((arr,i) => {
+          if (i < state.length && Array.isArray(arr)) {
+            arr.forEach(si => state[i].add(si));
+          }
+        });
+      }
+      if (typeof parsed.selected === 'number') selected = parsed.selected;
+      if (parsed.emailSubmitted) emailSubmitted = true;
+    }
+  } catch(e){}
+
+  function save(){
+    try {
+      const data = {
+        state: state.map(s => Array.from(s)),
+        selected,
+        emailSubmitted
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch(e){}
+  }
+
+  const SVGNS = "http://www.w3.org/2000/svg";
+  const phaseDone = i => state[i].size === phases[i].steps.length;
+  const totalSteps = phases.reduce((a,p)=>a+p.steps.length,0);
+
+  function buildTrail(){
+    let d = "";
+    campPositions.forEach((pos,i)=>{
+      if(i===0){ d = `M${pos.x},${pos.y}`; return; }
+      const prev = campPositions[i-1];
+      const cpx = (prev.x+pos.x)/2 + (i%2===0 ? -30 : 30);
+      const cpy = (prev.y+pos.y)/2;
+      d += ` Q${cpx},${cpy} ${pos.x},${pos.y}`;
+    });
+    return d;
+  }
+  const trailPath = buildTrail();
+  document.getElementById('trailDash').setAttribute('d', trailPath);
+  document.getElementById('trailFill').setAttribute('d', trailPath);
+
+  const treesG = document.getElementById('trees');
+  treePos.forEach(()=>{
+    const g = document.createElementNS(SVGNS,'g');
+    const trunk = document.createElementNS(SVGNS,'rect');
+    const leaf = document.createElementNS(SVGNS,'path');
+    g.appendChild(trunk); g.appendChild(leaf);
+    treesG.appendChild(g);
+  });
+
+  const campsG = document.getElementById('camps');
+  campPositions.forEach((pos,i)=>{
+    const g = document.createElementNS(SVGNS,'g');
+    g.setAttribute('class','camp-group');
+    g.addEventListener('click',()=>selectCamp(i));
+
+    const ring = document.createElementNS(SVGNS,'circle');
+    ring.setAttribute('cx',pos.x); ring.setAttribute('cy',pos.y);
+    ring.setAttribute('fill','none'); ring.setAttribute('stroke-width','2');
+    ring.setAttribute('class','sel-ring'); ring.style.display='none';
+    const anim1 = document.createElementNS(SVGNS,'animate');
+    anim1.setAttribute('attributeName','r'); anim1.setAttribute('values','22;26;22'); anim1.setAttribute('dur','2s'); anim1.setAttribute('repeatCount','indefinite');
+    const anim2 = document.createElementNS(SVGNS,'animate');
+    anim2.setAttribute('attributeName','opacity'); anim2.setAttribute('values','0.6;0.25;0.6'); anim2.setAttribute('dur','2s'); anim2.setAttribute('repeatCount','indefinite');
+    ring.appendChild(anim1); ring.appendChild(anim2);
+
+    const dot = document.createElementNS(SVGNS,'circle');
+    dot.setAttribute('cx',pos.x); dot.setAttribute('cy',pos.y); dot.setAttribute('r','15');
+    dot.setAttribute('stroke-width','2.5'); dot.style.transition='all .3s'; dot.setAttribute('class','camp-dot');
+
+    const txt = document.createElementNS(SVGNS,'text');
+    txt.setAttribute('x',pos.x); txt.setAttribute('y',pos.y+5); txt.setAttribute('text-anchor','middle');
+    txt.setAttribute('font-size','11'); txt.setAttribute('font-family',"'Space Mono',monospace"); txt.setAttribute('font-weight','700');
+    txt.style.pointerEvents='none'; txt.setAttribute('class','camp-num');
+
+    const onLeft = pos.side==="left";
+    const labelX = onLeft ? pos.x-22 : pos.x+22;
+    const pill = document.createElementNS(SVGNS,'rect');
+    const pillW = phases[i].title.length*5.5+16;
+    pill.setAttribute('x', onLeft ? labelX-(phases[i].title.length*5.5+12) : labelX-6);
+    pill.setAttribute('y',pos.y-10); pill.setAttribute('width',pillW); pill.setAttribute('height','20'); pill.setAttribute('rx','10');
+    pill.style.transition='fill .2s'; pill.setAttribute('class','camp-pill');
+
+    const label = document.createElementNS(SVGNS,'text');
+    label.setAttribute('x', onLeft ? labelX-6 : labelX+2); label.setAttribute('y',pos.y+3);
+    label.setAttribute('text-anchor', onLeft ? 'end':'start'); label.setAttribute('font-size','9');
+    label.setAttribute('font-family',"'IBM Plex Sans',sans-serif"); label.setAttribute('font-weight','500');
+    label.setAttribute('fill','#f5f0e8'); label.setAttribute('letter-spacing','0.3'); label.style.pointerEvents='none';
+    label.textContent = phases[i].title;
+
+    g.appendChild(ring); g.appendChild(dot); g.appendChild(txt); g.appendChild(pill); g.appendChild(label);
+    campsG.appendChild(g);
+  });
+
+  const navDots = document.getElementById('navDots');
+  phases.forEach((_,i)=>{
+    const b = document.createElement('button');
+    b.className='nav-dot';
+    b.addEventListener('click',()=>selectCamp(i));
+    navDots.appendChild(b);
+  });
+
+  function selectCamp(i){ selected=i; save(); render(); }
+
+  function toggleStep(si){
+    if(state[selected].has(si)) state[selected].delete(si);
+    else state[selected].add(si);
+    save();
+    render();
+  }
+
+  document.getElementById('prevBtn').addEventListener('click',()=>{ if(selected>0){selected--;save();render();} });
+  document.getElementById('nextBtn').addEventListener('click',()=>{ if(selected<phases.length-1){selected++;save();render();} });
+
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    if(confirm('Clear all your progress and start again?')){
+      state.forEach(s => s.clear());
+      selected = 0;
+      emailSubmitted = false;
+      try { localStorage.removeItem(STORAGE_KEY); } catch(e){}
+      render();
+    }
+  });
+
+  document.getElementById('ctSubmit').addEventListener('click', async ()=>{
+    const name = document.getElementById('ctName').value.trim();
+    const email = document.getElementById('ctEmail').value.trim();
+    const submitBtn = document.getElementById('ctSubmit');
+
+    if (!name || !email || !email.includes('@')) {
+      if (!name) document.getElementById('ctName').style.borderColor = '#c4622a';
+      if (!email || !email.includes('@')) document.getElementById('ctEmail').style.borderColor = '#c4622a';
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending\u2026';
+
+    try {
+      const formData = new FormData();
+      formData.append('EMAIL', email);
+      formData.append('FIRSTNAME', name);
+      formData.append('email_address_check', '');
+      formData.append('locale', 'en');
+
+      await fetch(BREVO_FORM_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+      });
+    } catch(e) {}
+
+    emailSubmitted = true;
+    save();
+    document.getElementById('emailFormBody').style.display = 'none';
+    document.getElementById('emailFormSuccess').classList.add('show');
+  });
+
+  ['ctName','ctEmail'].forEach(id => {
+    document.getElementById(id).addEventListener('focus', e => { e.target.style.borderColor = ''; });
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('ctSubmit').click();
+    });
+  });
+
+  function render(){
+    const doneCount = phases.filter((_,i)=>phaseDone(i)).length;
+    const progress = doneCount/phases.length;
+    const totalDone = state.reduce((a,s)=>a+s.size,0);
+
+    let highest = -1;
+    for(let i=phases.length-1;i>=0;i--){ if(phaseDone(i)){ highest=i; break; } }
+
+    const rect = document.getElementById('greenRect');
+    rect.setAttribute('y', 460 - progress*400);
+    rect.setAttribute('height', progress*400);
+
+    const trailFill = document.getElementById('trailFill');
+    if(highest>=0){
+      const totalLen=600;
+      const filled=((highest+1)/phases.length)*totalLen;
+      trailFill.setAttribute('stroke-dasharray', `${filled} ${totalLen}`);
+      trailFill.style.display='block';
+    } else { trailFill.style.display='none'; }
+
+    document.getElementById('ground').setAttribute('fill', `rgba(45,90,63,${0.08+progress*0.28})`);
+
+    const treeCount = Math.ceil(progress*6);
+    Array.from(treesG.children).forEach((g,i)=>{
+      const t = treePos[i];
+      const active = i < treeCount;
+      g.setAttribute('opacity', active ? 0.9 : 0.12);
+      g.style.transition='opacity .5s';
+      const trunk = g.children[0], leaf = g.children[1];
+      trunk.setAttribute('x',t.x-1); trunk.setAttribute('y',t.y); trunk.setAttribute('width','2'); trunk.setAttribute('height','8'); trunk.setAttribute('fill','#3d2e1e');
+      leaf.setAttribute('d',`M${t.x-5},${t.y} L${t.x},${t.y-11} L${t.x+5},${t.y} Z`);
+      leaf.setAttribute('fill', active ? 'rgba(45,90,63,0.85)' : 'rgba(150,140,130,0.25)');
+    });
+
+    Array.from(campsG.children).forEach((g,i)=>{
+      const reached = phaseDone(i);
+      const isSel = selected===i;
+      const isNext = !reached && (i===0 || phaseDone(i-1));
+      const ring = g.querySelector('.sel-ring');
+      const dot = g.querySelector('.camp-dot');
+      const num = g.querySelector('.camp-num');
+      const pill = g.querySelector('.camp-pill');
+
+      ring.style.display = isSel ? 'block':'none';
+      ring.setAttribute('stroke', reached ? '#3a8a52':'#c4622a');
+
+      dot.setAttribute('fill', reached ? '#1a3a2a' : isNext ? '#c4622a' : '#fff');
+      dot.setAttribute('stroke', reached ? '#244d36' : isNext ? '#a8501f' : 'rgba(61,46,30,0.12)');
+      num.setAttribute('fill', (reached||isNext) ? '#fff' : '#9b8f7e');
+      num.textContent = reached ? '\u2713' : phases[i].num;
+      pill.setAttribute('fill', isSel ? 'rgba(26,58,42,0.8)' : 'rgba(26,58,42,0.55)');
+    });
+
+    const flag = document.getElementById('summitFlag');
+    flag.setAttribute('opacity', progress>=1 ? 1 : 0.3);
+    flag.querySelector('line').setAttribute('stroke', progress>=1 ? '#c4622a':'#9b8f7e');
+    flag.querySelector('path').setAttribute('fill', progress>=1 ? '#c4622a':'rgba(155,143,126,0.4)');
+
+    document.getElementById('progCount').textContent = `${doneCount} / ${phases.length}`;
+    document.getElementById('progFill').style.width = `${progress*100}%`;
+    document.getElementById('progSub').textContent = `${totalDone} of ${totalSteps} steps ticked off`;
+
+    const ph = phases[selected];
+    const reached = phaseDone(selected);
+    const card = document.getElementById('detailCard');
+    card.className = 'detail-card ' + (reached ? 'is-reached':'not-reached');
+    const numEl = document.getElementById('detailNum');
+    numEl.className = 'detail-num-circle' + (reached ? ' done':'');
+    numEl.textContent = reached ? '\u2713' : ph.num;
+    document.getElementById('detailPhaseLabel').textContent = `PHASE ${selected+1} OF ${phases.length}`;
+    document.getElementById('detailAltitude').textContent = `\u25B2 ${ph.altitude}`;
+    document.getElementById('detailTitle').textContent = ph.title;
+    document.getElementById('detailDesc').textContent = ph.desc;
+    document.getElementById('stepsLabel').textContent = `${state[selected].size} of ${ph.steps.length} steps`;
+
+    const list = document.getElementById('stepsList');
+    list.innerHTML = '';
+    ph.steps.forEach((step,si)=>{
+      const done = state[selected].has(si);
+      const row = document.createElement('div'); row.className='step-row';
+      const box = document.createElement('div'); box.className='step-box'+(done?' done':'');
+      box.innerHTML = '<svg class="cv" viewBox="0 0 16 16" fill="none" stroke="#f5f0e8" stroke-width="2.5" stroke-linecap="round"><path d="M3.5 8.5L6.5 11.5L12.5 4.5"/></svg>';
+      box.addEventListener('click',()=>toggleStep(si));
+      const txt = document.createElement('div'); txt.className='step-txt'+(done?' done':''); txt.textContent = step;
+      row.appendChild(box); row.appendChild(txt);
+      list.appendChild(row);
+    });
+
+    const reward = document.getElementById('reward');
+    if(reached){ reward.classList.add('show'); document.getElementById('rewardText').textContent = ph.reward; }
+    else { reward.classList.remove('show'); }
+
+    Array.from(navDots.children).forEach((b,i)=>{
+      b.className = 'nav-dot ' + (selected===i ? 'active' : phaseDone(i) ? 'on' : '');
+    });
+
+    document.getElementById('prevBtn').disabled = selected===0;
+    document.getElementById('nextBtn').disabled = selected===phases.length-1;
+
+    const allDone = doneCount===phases.length;
+    document.getElementById('bottomTitle').innerHTML = allDone
+      ? `You've mapped the <em>whole path</em>. Want help walking it?`
+      : `Setting up alone is hard. <em>You don't have to.</em>`;
+    document.getElementById('bottomText').textContent = allDone
+      ? "You've worked through every phase. The path is mapped. Now come and walk it alongside other practitioners who are doing this work, in a community built to hold the space holders."
+      : "Some practitioners work through this themselves. Others want someone who's already done it to guide them. Join the community and walk the path with people who get it.";
+
+    const emailForm = document.getElementById('emailForm');
+    const firstPhaseDone = phaseDone(0);
+    if (firstPhaseDone && !emailSubmitted) {
+      emailForm.classList.add('show');
+    } else if (firstPhaseDone && emailSubmitted) {
+      emailForm.classList.add('show');
+      document.getElementById('emailFormBody').style.display = 'none';
+      document.getElementById('emailFormSuccess').classList.add('show');
+    } else {
+      emailForm.classList.remove('show');
+    }
+  }
+
+  render();
+</script>
+
+</body>
+</html>
